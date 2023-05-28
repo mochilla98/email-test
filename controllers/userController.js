@@ -29,9 +29,10 @@ const createUser = async (req, res) => {
     email,
     number,
     password: hashPassword,
-    isAdmin: ifAdmin,
+    isAdmin: false,
     verificationToken,
   });
+
   const origin = "http://localhost:4000";
 
   await sendVerificationEmail({
@@ -47,21 +48,22 @@ const createUser = async (req, res) => {
 };
 
 const verifyEmail = async (req, res) => {
-  const { verificationToken, email } = req.body;
+  const { token : verificationToken, email } = req.query;
   const user = await User.findOne({ email });
-
+  
   if (!user) {
-    res.send("Verification Failed,no uaer found ");
+    return res.send("Verification Failed,no uaer found ");
   }
 
   if (user.verificationToken !== verificationToken) {
-    res.send("Verification token not present");
+    return res.send("Verification token not present");
   }
 
-  (user.isVerified = true), (user.verified = Date.now());
-  user.verificationToken = "";
-
-  await user.save();
+  await User.findOneAndUpdate({email}, {
+    isVerified : true,
+    verified : Date.now(),
+    verificationToken
+  });
 
   res.send("Email Verified");
   res.render("emailVerified");

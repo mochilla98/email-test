@@ -7,6 +7,7 @@ const app = express();
 
 // require routes
 const userRoute = require("./routes/userRoute");
+
 app.use("/", userRoute);
 
 app.use(morgan("tiny"));
